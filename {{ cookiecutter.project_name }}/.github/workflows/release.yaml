@@ -6,7 +6,7 @@ on:
       - '*.*.*'
 
 env:
-  REGISTRY_IMAGE: ghcr.io/{{ cookiecutter.github_username }}{% endraw %}/{{ cookiecutter.project_name }}{% endraw %}
+  REGISTRY_IMAGE: ghcr.io/{{ cookiecutter.github_username }}/{{ cookiecutter.project_name }}
 
 jobs:
   build:
