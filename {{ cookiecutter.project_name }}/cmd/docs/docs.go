@@ -4,16 +4,16 @@ package docs
 import "github.com/swaggo/swag"
 
 const docTemplate = `{
-    "schemes": {{ marshal .Schemes }},
+    "schemes": {% raw %}{{ marshal .Schemes }}{% endraw %},
     "swagger": "2.0",
     "info": {
-        "description": "{{escape .Description}}",
-        "title": "{{.Title}}",
+        "description": "{% raw %}{{escape .Description}}{% endraw %}",
+        "title": "{% raw %}{{.Title}}{% endraw %}",
         "contact": {},
-        "version": "{{.Version}}"
+        "version": "{% raw %}{{.Version}}{% endraw %}"
     },
-    "host": "{{.Host}}",
-    "basePath": "{{.BasePath}}",
+    "host": "{% raw %}{{.Host}}{% endraw %}",
+    "basePath": "{% raw %}{{.BasePath}}{% endraw %}",
     "paths": {
         "/get/{name}": {
             "get": {
@@ -147,8 +147,8 @@ var SwaggerInfo = &swag.Spec{
 	Description:      "",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
-	LeftDelim:        "{{",
-	RightDelim:       "}}",
+	LeftDelim:        "{% raw %}{{",
+	RightDelim:       "}}{% endraw %}",
 }
 
 func init() {

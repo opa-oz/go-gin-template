@@ -6,7 +6,7 @@ on:
       - '*.*.*'
 
 env:
-  REGISTRY_IMAGE: ghcr.io/{{ cookiecutter.github_username }}/{{ cookiecutter.project_name }}
+  REGISTRY_IMAGE: ghcr.io/{{ cookiecutter.github_username }}{% endraw %}/{{ cookiecutter.project_name }}{% endraw %}
 
 jobs:
   build:
@@ -22,7 +22,7 @@ jobs:
     steps:
       - name: Prepare
         run: |
-          platform=${{ matrix.platform }}
+          platform=${% raw %}{{ matrix.platform }}{% endraw %}
           echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
       - name: Checkout
         uses: actions/checkout@v4
@@ -30,7 +30,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY_IMAGE }}
+          images: ${% raw %}{{ env.REGISTRY_IMAGE }}{% endraw %}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
@@ -39,25 +39,25 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{github.actor}}
-          password: ${{secrets.GITHUB_TOKEN}}
+          username: ${% raw %}{{github.actor}}{% endraw %}
+          password: ${% raw %}{{secrets.GITHUB_TOKEN}}{% endraw %}
       - name: Build and push by digest
         id: build
         uses: docker/build-push-action@v5
         with:
           context: .
-          platforms: ${{ matrix.platform }}
-          labels: ${{ steps.meta.outputs.labels }}
-          outputs: type=image,name=${{ env.REGISTRY_IMAGE }},push-by-digest=true,name-canonical=true,push=true
+          platforms: ${% raw %}{{ matrix.platform }}{% endraw %}
+          labels: ${% raw %}{{ steps.meta.outputs.labels }}{% endraw %}
+          outputs: type=image,name=${% raw %}{{ env.REGISTRY_IMAGE }}{% endraw %},push-by-digest=true,name-canonical=true,push=true
       - name: Export digest
         run: |
           mkdir -p /tmp/digests
-          digest="${{ steps.build.outputs.digest }}"
+          digest="${% raw %}{{ steps.build.outputs.digest }}{% endraw %}"
           touch "/tmp/digests/${digest#sha256:}"
       - name: Upload digest
         uses: actions/upload-artifact@v4
         with:
-          name: digests-${{ env.PLATFORM_PAIR }}
+          name: digests-${% raw %}{{ env.PLATFORM_PAIR }}{% endraw %}
           path: /tmp/digests/*
           if-no-files-found: error
           retention-days: 1
@@ -79,18 +79,18 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY_IMAGE }}
+          images: ${% raw %}{{ env.REGISTRY_IMAGE }}{% endraw %}
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{github.actor}}
-          password: ${{secrets.GITHUB_TOKEN}}
+          username: ${% raw %}{{github.actor}}{% endraw %}
+          password: ${% raw %}{{secrets.GITHUB_TOKEN}}{% endraw %}
       - name: Create manifest list and push
         working-directory: /tmp/digests
         run: |
           docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
-            $(printf '${{ env.REGISTRY_IMAGE }}@sha256:%s ' *)
+            $(printf '${% raw %}{{ env.REGISTRY_IMAGE }}{% endraw %}@sha256:%s ' *)
       - name: Inspect image
         run: |
-          docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${{ steps.meta.outputs.version }}
+          docker buildx imagetools inspect ${% raw %}{{ env.REGISTRY_IMAGE }}{% endraw %}:${% raw %}{{ steps.meta.outputs.version }}{% endraw %}
